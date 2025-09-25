@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real vs. Nominal Return Calculator</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            font-weight: 300;
+            opacity: 0.9;
+        }
+
+        .formula-box {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .formula {
+            font-size: 1.3rem;
+            font-weight: 500;
+            font-family: 'Courier New', monospace;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .calculator-card, .results-card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-label {
+            display: block;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .input-container {
+            position: relative;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 15px 45px 15px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-suffix {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+            font-weight: 500;
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(0);
+        }
+
+        .examples-btn {
+            width: 100%;
+            padding: 12px;
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .examples-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .results-section {
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .result-label {
+            color: #555;
+            font-weight: 500;
+        }
+
+        .result-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .real-return {
+            color: #22c55e;
+        }
+
+        .negative-return {
+            color: #ef4444;
+        }
+
+        .assessment {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .assessment.excellent {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .assessment.good {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+
+        .assessment.neutral {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+
+        .assessment.poor {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .calculation-steps {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .step {
+            margin-bottom: 8px;
+            font-family: 'Courier New', monospace;
+            color: #555;
+        }
+
+        .analysis-section {
+            grid-column: 1 / -1;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-top: 20px;
+            display: none;
+        }
+
+        .analysis-section.show {
+            display: block;
+        }
+
+        .chart-container {
+            margin-top: 30px;
+            height: 400px;
+        }
+
+        .purchasing-power-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .purchasing-power-table th,
+        .purchasing-power-table td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid #eee;
+        }
+
+        .purchasing-power-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .examples-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .examples-modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .example-item {
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .example-item:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .example-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .example-description {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .example-values {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9rem;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 15px;
+            border: 1px solid #fecaca;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .calculator-card, .results-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-chart-line"></i> Real vs. Nominal Return Calculator</h1>
+            <p>Understanding the true impact of inflation on your investments</p>
+        </div>
+
+        <div class="formula-box">
+            <div class="formula">
+                Real Return = ((1 + Nominal Return) ÷ (1 + Inflation Rate)) - 1
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="calculator-card">
+                <h2 class="card-title">
+                    <i class="fas fa-calculator"></i>
+                    Calculate Returns
+                </h2>
+                
+                <form id="calculatorForm">
+                    <div class="input-group">
+                        <label class="input-label" for="nominalReturn">
+                            Nominal Return Rate
+                        </label>
+                        <div class="input-container">
+                            <input type="text" id="nominalReturn" class="input-field" 
+                                   placeholder="Enter return rate (e.g., 8 or 8%)" required>
+                            <span class="input-suffix">%</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label" for="inflationRate">
+                            Inflation Rate
+                        </label>
+                        <div class="input-container">
+                            <input type="text" id="inflationRate" class="input-field" 
+                                   placeholder="Enter inflation rate (e.g., 3 or 3%)" required>
+                            <span class="input-suffix">%</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label" for="investmentAmount">
+                            💰 Investment Amount (Optional)
+                        </label>
+                        <div class="input-container">
+                            <input type="text" id="investmentAmount" class="input-field" 
+                                   placeholder="e.g., 50000, 1L, 2.5 lakh (default: ₹1,00,000)">
+                            <span class="input-suffix">₹</span>
+                        </div>
+                        <small style="color: #666; font-size: 0.9rem; margin-top: 5px; display: block;">
+                            💡 Examples: 50000, 1L (1 lakh), 2.5L, 1 crore, ₹75000
+                        </small>
+                    </div>
+
+                    <button type="submit" class="calculate-btn">
+                        <i class="fas fa-calculator"></i> Calculate Real Return
+                    </button>
+                </form>
+
+                <button type="button" class="examples-btn" onclick="showExamples()">
+                    <i class="fas fa-lightbulb"></i> View Examples
+                </button>
+
+                <div class="loading" id="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Calculating...
+                </div>
+            </div>
+
+            <div class="results-card">
+                <h2 class="card-title">
+                    <i class="fas fa-chart-bar"></i>
+                    Results
+                </h2>
+                
+                <div id="noResults" style="text-align: center; color: #666; padding: 40px 0;">
+                    <i class="fas fa-info-circle" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i>
+                    <p>Enter your investment details to see the inflation-adjusted returns</p>
+                </div>
+
+                <div class="results-section" id="resultsSection">
+                    <div class="result-item">
+                        <span class="result-label">Nominal Return:</span>
+                        <span class="result-value" id="nominalResult">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Inflation Rate:</span>
+                        <span class="result-value" id="inflationResult">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Real Return:</span>
+                        <span class="result-value real-return" id="realResult">-</span>
+                    </div>
+
+                    <div class="assessment" id="assessment">
+                        <!-- Assessment will be populated by JavaScript -->
+                    </div>
+
+                    <div class="calculation-steps" id="calculationSteps">
+                        <h4 style="margin-bottom: 15px; color: #333;">
+                            <i class="fas fa-calculator"></i> Step-by-Step Calculation:
+                        </h4>
+                        <div id="stepsList">
+                            <!-- Steps will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="error" id="errorMessage" style="display: none;">
+                    <!-- Error message will be shown here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="analysis-section" id="analysisSection">
+            <h2 class="card-title">
+                <i class="fas fa-chart-area"></i>
+                Purchasing Power Analysis
+            </h2>
+            
+            <p style="margin-bottom: 20px; color: #666;" id="analysisDescription">
+                Impact on your investment over time:
+            </p>
+
+            <table class="purchasing-power-table" id="purchasingPowerTable">
+                <thead>
+                    <tr>
+                        <th>Years</th>
+                        <th>Nominal Value</th>
+                        <th>Real Value (Today's $)</th>
+                        <th>Inflation Impact</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Examples Modal -->
+    <div class="examples-modal" id="examplesModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="hideExamples()">&times;</button>
+            <h2 style="margin-bottom: 20px;">
+                <i class="fas fa-lightbulb"></i> Example Calculations
+            </h2>
+            <div id="examplesList">
+                <!-- Examples will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Form submission handler
+        document.getElementById('calculatorForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const nominalReturn = document.getElementById('nominalReturn').value;
+            const inflationRate = document.getElementById('inflationRate').value;
+            const investmentAmount = document.getElementById('investmentAmount').value;
+            
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+            
+            try {
+                const response = await fetch('/calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        nominal_return: nominalReturn,
+                        inflation_rate: inflationRate,
+                        investment_amount: investmentAmount
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayResults(data.results);
+                    if (data.warning) {
+                        showWarning(data.warning);
+                    }
+                } else {
+                    showError(data.error);
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        });
+
+        function displayResults(results) {
+            // Hide no results message
+            document.getElementById('noResults').style.display = 'none';
+            
+            // Show results section
+            document.getElementById('resultsSection').classList.add('show');
+            document.getElementById('analysisSection').classList.add('show');
+            
+            // Populate results
+            document.getElementById('nominalResult').textContent = results.nominal_return;
+            document.getElementById('inflationResult').textContent = results.inflation_rate;
+            
+            const realResultElement = document.getElementById('realResult');
+            realResultElement.textContent = results.real_return;
+            
+            // Color code the real return
+            if (results.real_return_decimal < 0) {
+                realResultElement.className = 'result-value negative-return';
+            } else {
+                realResultElement.className = 'result-value real-return';
+            }
+            
+            // Show assessment
+            const assessmentElement = document.getElementById('assessment');
+            assessmentElement.className = `assessment ${results.assessment.level}`;
+            assessmentElement.innerHTML = `
+                <div style="font-size: 1.5rem; margin-bottom: 5px;">${results.assessment.icon}</div>
+                ${results.assessment.message}
+            `;
+            
+            // Show calculation steps
+            const stepsList = document.getElementById('stepsList');
+            stepsList.innerHTML = `
+                <div class="step">Step 1: ${results.calculation_steps.step1}</div>
+                <div class="step">Step 2: ${results.calculation_steps.step2}</div>
+                <div class="step">Step 3: ${results.calculation_steps.step3}</div>
+                <div class="step">Step 4: ${results.calculation_steps.step4}</div>
+            `;
+            
+            // Update analysis description
+            const analysisDescription = document.getElementById('analysisDescription');
+            analysisDescription.textContent = `Impact on ${results.investment_amount_formatted} investment over time:`;
+            
+            // Populate purchasing power table
+            const tableBody = document.querySelector('#purchasingPowerTable tbody');
+            tableBody.innerHTML = '';
+            
+            results.purchasing_power_data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.years}</td>
+                    <td>${row.nominal_formatted}</td>
+                    <td>${row.real_formatted}</td>
+                    <td style="color: ${row.inflation_impact > 0 ? '#ef4444' : '#22c55e'}">
+                        ${row.inflation_formatted}
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        function showError(message) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            
+            // Hide results
+            document.getElementById('resultsSection').classList.remove('show');
+            document.getElementById('analysisSection').classList.remove('show');
+            document.getElementById('noResults').style.display = 'block';
+        }
+
+        function showWarning(message) {
+            // Could add a warning display here
+            console.warn('Warning:', message);
+        }
+
+        async function showExamples() {
+            try {
+                const response = await fetch('/examples');
+                const examples = await response.json();
+                
+                const examplesList = document.getElementById('examplesList');
+                examplesList.innerHTML = '';
+                
+                examples.forEach(example => {
+                    const div = document.createElement('div');
+                    div.className = 'example-item';
+                    div.onclick = () => useExample(example);
+                    
+                    div.innerHTML = `
+                        <div class="example-name">${example.name}</div>
+                        <div class="example-description">${example.description}</div>
+                        <div class="example-values">
+                            <span><strong>Nominal:</strong> ${example.nominal}%</span>
+                            <span><strong>Inflation:</strong> ${example.inflation}%</span>
+                            <span><strong>Real Return:</strong> 
+                                <span style="color: ${example.real_return_decimal < 0 ? '#ef4444' : '#22c55e'}">
+                                    ${example.real_return}
+                                </span>
+                            </span>
+                        </div>
+                    `;
+                    
+                    examplesList.appendChild(div);
+                });
+                
+                document.getElementById('examplesModal').classList.add('show');
+            } catch (error) {
+                console.error('Failed to load examples:', error);
+            }
+        }
+
+        function hideExamples() {
+            document.getElementById('examplesModal').classList.remove('show');
+        }
+
+        function useExample(example) {
+            document.getElementById('nominalReturn').value = example.nominal;
+            document.getElementById('inflationRate').value = example.inflation;
+            
+            // Set example investment amounts based on scenario
+            const exampleAmounts = {
+                'Stock Market Investment': '50000',
+                'Government Bonds': '100000', 
+                'High Growth Stock': '25000',
+                'Savings Account': '200000',
+                'Real Estate': '500000'
+            };
+            
+            const suggestedAmount = exampleAmounts[example.name] || '100000';
+            document.getElementById('investmentAmount').value = suggestedAmount;
+            
+            hideExamples();
+            
+            // Auto-calculate
+            document.getElementById('calculatorForm').dispatchEvent(new Event('submit'));
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('examplesModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideExamples();
+            }
+        });
+    </script>
+</body>
+</html>
