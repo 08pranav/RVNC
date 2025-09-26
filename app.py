@@ -13,7 +13,9 @@ from calculator import (
     calculate_purchasing_power,
     format_currency,
     calculate_investment_scenarios,
-    parse_currency_input
+    parse_currency_input,
+    calculate_detailed_projections,
+    calculate_sip_projections
 )
 from data_provider import (
     get_country_inflation_rate,
@@ -47,6 +49,60 @@ def api_inflation(country_code):
 def api_investment_types():
     """Get all investment types"""
     return jsonify(get_investment_categories())
+
+@app.route('/api/detailed-projections', methods=['POST'])
+def api_detailed_projections():
+    """Get detailed future value projections"""
+    try:
+        data = request.get_json()
+        
+        initial_amount = parse_currency_input(str(data.get('amount', '100000')))
+        nominal_return = parse_percentage_input(str(data.get('nominal_return', '8')))
+        inflation_rate = parse_percentage_input(str(data.get('inflation_rate', '3')))
+        years_list = data.get('years', [1, 2, 3, 5, 7, 10, 15, 20, 25, 30])
+        include_monthly = data.get('include_monthly', True)
+        
+        projections = calculate_detailed_projections(
+            initial_amount, nominal_return, inflation_rate, 
+            years_list, include_monthly
+        )
+        
+        return jsonify({
+            'success': True,
+            'projections': projections
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Projection calculation error: {str(e)}'
+        })
+
+@app.route('/api/sip-projections', methods=['POST'])
+def api_sip_projections():
+    """Get SIP (Systematic Investment Plan) projections"""
+    try:
+        data = request.get_json()
+        
+        monthly_amount = parse_currency_input(str(data.get('monthly_amount', '10000')))
+        nominal_return = parse_percentage_input(str(data.get('nominal_return', '12')))
+        inflation_rate = parse_percentage_input(str(data.get('inflation_rate', '4')))
+        years_list = data.get('years', [1, 2, 3, 5, 7, 10, 15, 20, 25, 30])
+        
+        projections = calculate_sip_projections(
+            monthly_amount, nominal_return, inflation_rate, years_list
+        )
+        
+        return jsonify({
+            'success': True,
+            'sip_projections': projections
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'SIP projection calculation error: {str(e)}'
+        })
 
 @app.route('/calculate', methods=['POST'])
 def calculate():
@@ -99,23 +155,30 @@ def calculate():
         # Calculate real return
         real_return = calculate_real_return(nominal_return, inflation_rate)
         
-        # Calculate investment scenarios with custom amount
-        scenarios_data = calculate_investment_scenarios(
+        # Calculate detailed projections
+        detailed_projections = calculate_detailed_projections(
             investment_amount, nominal_return, inflation_rate, 
-            [1, 5, 10, 15, 20, 25, 30]
+            [1, 2, 3, 5, 7, 10, 15, 20, 25, 30], include_monthly=True
         )
         
-        # Format purchasing power data for JSON response
+        # Calculate SIP projections (assuming monthly SIP of 1/12th of lump sum)
+        monthly_sip_amount = investment_amount / 120  # Assume 10-year SIP equivalent
+        sip_projections = calculate_sip_projections(
+            monthly_sip_amount, nominal_return, inflation_rate,
+            [1, 2, 3, 5, 7, 10, 15, 20, 25, 30]
+        )
+        
+        # Legacy format for backward compatibility
         purchasing_power_data = []
-        for scenario in scenarios_data['scenarios']:
+        for proj in detailed_projections['yearly_projections'][:7]:  # First 7 years
             purchasing_power_data.append({
-                'years': scenario['years'],
-                'nominal_value': round(scenario['nominal_value'], 2),
-                'real_value': round(scenario['real_value'], 2),
-                'inflation_impact': round(scenario['inflation_impact'], 2),
-                'nominal_formatted': scenario['nominal_formatted'],
-                'real_formatted': scenario['real_formatted'],
-                'inflation_formatted': scenario['inflation_formatted']
+                'years': proj['years'],
+                'nominal_value': round(proj['nominal_value'], 2),
+                'real_value': round(proj['real_value'], 2),
+                'inflation_impact': round(proj['inflation_impact'], 2),
+                'nominal_formatted': proj['formatted']['nominal_value'],
+                'real_formatted': proj['formatted']['real_value'],
+                'inflation_formatted': proj['formatted']['inflation_impact']
             })
         
         # Determine investment assessment
@@ -157,7 +220,9 @@ def calculate():
                     'step3': f"{1 + nominal_return:.4f} ÷ {1 + inflation_rate:.4f} = {(1 + nominal_return) / (1 + inflation_rate):.6f}",
                     'step4': f"{(1 + nominal_return) / (1 + inflation_rate):.6f} - 1 = {real_return:.6f}"
                 },
-                'purchasing_power_data': purchasing_power_data,
+                'purchasing_power_data': purchasing_power_data,  # Legacy compatibility
+                'detailed_projections': detailed_projections,    # NEW: Detailed year-by-year projections
+                'sip_projections': sip_projections,             # NEW: SIP calculations
                 'assessment': assessment,
                 'investment_amount': investment_amount,
                 'investment_amount_formatted': format_currency(investment_amount),

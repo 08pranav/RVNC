@@ -272,13 +272,97 @@
             pointer-events: none;
         }
 
+        /* NEW: Projections Styles */
+        .projections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .projections-card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .projections-table {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .projection-row {
+            display: grid;
+            grid-template-columns: 80px 120px 120px 100px;
+            gap: 15px;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            align-items: center;
+        }
+
+        .projection-header {
+            font-weight: 600;
+            color: #333;
+            background: #e9ecef;
+        }
+
+        .projection-year {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .projection-gain {
+            color: #28a745;
+            font-weight: 500;
+        }
+
+        .projection-real {
+            color: #007bff;
+            font-weight: 500;
+        }
+
+        .projection-percentage {
+            color: #6c757d;
+            font-size: 0.8rem;
+        }
+
+        .monthly-row {
+            display: grid;
+            grid-template-columns: 60px 100px 100px 80px;
+            gap: 10px;
+            padding: 8px;
+            margin-bottom: 4px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        .sip-highlight {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            border-left: 4px solid #667eea;
+        }
+
         @media (max-width: 768px) {
             .main-content {
                 grid-template-columns: 1fr;
             }
             
+            .projections-grid {
+                grid-template-columns: 1fr;
+            }
+            
             .header h1 {
                 font-size: 2rem;
+            }
+
+            .projection-row {
+                grid-template-columns: 60px 100px 100px 80px;
+                font-size: 0.8rem;
             }
         }
     </style>
@@ -422,6 +506,30 @@
                     <i class="fas fa-chart-line" style="font-size: 3rem; margin-bottom: 20px; opacity: 0.3;"></i>
                     <p>Enter your investment details and click calculate to see results</p>
                 </div>
+            </div>
+        </div>
+
+        <!-- NEW: Detailed Projections Section -->
+        <div id="projectionsSection" class="projections-grid" style="display: none;">
+            <div class="projections-card">
+                <div class="card-title">
+                    <i class="fas fa-calendar-alt"></i> Detailed Future Value Projections
+                </div>
+                <div id="yearlyProjections" class="projections-table"></div>
+            </div>
+
+            <div class="projections-card">
+                <div class="card-title">
+                    <i class="fas fa-chart-line"></i> SIP (Systematic Investment Plan)
+                </div>
+                <div id="sipProjections" class="projections-table"></div>
+            </div>
+
+            <div class="projections-card">
+                <div class="card-title">
+                    <i class="fas fa-clock"></i> Monthly Progress (First 3 Years)
+                </div>
+                <div id="monthlyProjections" class="projections-table"></div>
             </div>
         </div>
     </div>
@@ -593,9 +701,123 @@
             }
             document.getElementById('metadataInfo').innerHTML = metadataHtml;
 
+            // NEW: Display detailed projections
+            displayDetailedProjections(results.detailed_projections);
+            displaySipProjections(results.sip_projections);
+            displayMonthlyProjections(results.detailed_projections.monthly_projections);
+
             // Show results section
             noResults.style.display = 'none';
             resultsSection.style.display = 'block';
+            document.getElementById('projectionsSection').style.display = 'block';
+        }
+
+        // NEW: Display detailed yearly projections
+        function displayDetailedProjections(projections) {
+            const container = document.getElementById('yearlyProjections');
+            let html = `
+                <div class="projection-row projection-header">
+                    <div>Years</div>
+                    <div>Nominal Value</div>
+                    <div>Real Value</div>
+                    <div>Real Gain %</div>
+                </div>
+            `;
+
+            projections.yearly_projections.forEach(proj => {
+                const gainClass = proj.real_gain > 0 ? 'projection-gain' : 'text-danger';
+                html += `
+                    <div class="projection-row">
+                        <div class="projection-year">${proj.years}Y</div>
+                        <div>${proj.formatted.nominal_value}</div>
+                        <div class="projection-real">${proj.formatted.real_value}</div>
+                        <div class="${gainClass}">${proj.real_gain_percentage.toFixed(1)}%</div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // NEW: Display SIP projections
+        function displaySipProjections(sipData) {
+            const container = document.getElementById('sipProjections');
+            const monthlyAmount = sipData.monthly_amount;
+            
+            let html = `
+                <div style="margin-bottom: 15px; padding: 10px; background: #e3f2fd; border-radius: 8px;">
+                    <strong>Monthly SIP: ${formatCurrency(monthlyAmount)}</strong>
+                </div>
+                <div class="projection-row projection-header">
+                    <div>Years</div>
+                    <div>Invested</div>
+                    <div>Real Value</div>
+                    <div>Real Gain %</div>
+                </div>
+            `;
+
+            sipData.sip_projections.forEach(proj => {
+                const gainClass = proj.real_gain > 0 ? 'projection-gain' : 'text-danger';
+                html += `
+                    <div class="projection-row sip-highlight">
+                        <div class="projection-year">${proj.years}Y</div>
+                        <div>${proj.formatted.total_invested}</div>
+                        <div class="projection-real">${proj.formatted.real_value}</div>
+                        <div class="${gainClass}">${proj.real_gain_percentage.toFixed(1)}%</div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // NEW: Display monthly projections for first few years
+        function displayMonthlyProjections(monthlyData) {
+            const container = document.getElementById('monthlyProjections');
+            
+            if (!monthlyData || monthlyData.length === 0) {
+                container.innerHTML = '<p style="color: #888;">Monthly data not available</p>';
+                return;
+            }
+
+            let html = `
+                <div class="monthly-row projection-header">
+                    <div>Month</div>
+                    <div>Nominal</div>
+                    <div>Real Value</div>
+                    <div>Gain</div>
+                </div>
+            `;
+
+            // Show first 36 months (3 years)
+            const firstYear = monthlyData[0];
+            if (firstYear && firstYear.monthly_breakdown) {
+                firstYear.monthly_breakdown.slice(0, 36).forEach(month => {
+                    const gain = month.real_gain;
+                    const gainClass = gain > 0 ? 'projection-gain' : 'text-danger';
+                    html += `
+                        <div class="monthly-row">
+                            <div>${month.month}M</div>
+                            <div>${month.formatted.nominal_value}</div>
+                            <div class="projection-real">${month.formatted.real_value}</div>
+                            <div class="${gainClass}">${formatCurrency(gain)}</div>
+                        </div>
+                    `;
+                });
+            }
+
+            container.innerHTML = html;
+        }
+
+        // Utility function to format currency
+        function formatCurrency(amount) {
+            if (amount >= 10000000) {
+                return `₹${(amount/10000000).toFixed(2)} Cr`;
+            } else if (amount >= 100000) {
+                return `₹${(amount/100000).toFixed(2)} L`;
+            } else {
+                return `₹${amount.toLocaleString('en-IN')}`;
+            }
         }
 
         // Initialize with default values
