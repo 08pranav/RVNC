@@ -1,6 +1,6 @@
 """
 Real vs. Nominal Return Calculator - Flask Web Application
-Beautiful UI for calculating inflation-adjusted returns
+Beautiful UI for calculating inflation-adjusted returns with country-wise inflation and investment types
 """
 
 from flask import Flask, render_template, request, jsonify
@@ -15,23 +15,67 @@ from calculator import (
     calculate_investment_scenarios,
     parse_currency_input
 )
+from data_provider import (
+    get_country_inflation_rate,
+    get_all_countries,
+    get_investment_types,
+    get_investment_type_return,
+    get_investment_categories
+)
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
-    """Main page"""
-    return render_template('index.html')
+    """Main page with country and investment type data"""
+    countries = get_all_countries()
+    investment_categories = get_investment_categories()
+    return render_template('index.html', countries=countries, investment_categories=investment_categories)
+
+@app.route('/api/countries')
+def api_countries():
+    """Get all supported countries"""
+    return jsonify(get_all_countries())
+
+@app.route('/api/inflation/<country_code>')
+def api_inflation(country_code):
+    """Get inflation rate for a specific country"""
+    inflation_data = get_country_inflation_rate(country_code.upper())
+    return jsonify(inflation_data)
+
+@app.route('/api/investment-types')
+def api_investment_types():
+    """Get all investment types"""
+    return jsonify(get_investment_categories())
 
 @app.route('/calculate', methods=['POST'])
 def calculate():
-    """Calculate real return via API"""
+    """Calculate real return via API with enhanced features"""
     try:
         data = request.get_json()
         
-        # Parse inputs
-        nominal_return = parse_percentage_input(str(data.get('nominal_return', 0)))
-        inflation_rate = parse_percentage_input(str(data.get('inflation_rate', 0)))
+        # Handle country selection and inflation rate
+        country_code = data.get('country', 'IN')
+        use_country_inflation = data.get('use_country_inflation', False)
+        
+        if use_country_inflation:
+            country_inflation_data = get_country_inflation_rate(country_code)
+            inflation_rate = country_inflation_data['rate'] / 100  # Convert to decimal
+            inflation_source = country_inflation_data
+        else:
+            inflation_rate = parse_percentage_input(str(data.get('inflation_rate', 0)))
+            inflation_source = {'source': 'manual', 'rate': inflation_rate * 100}
+        
+        # Handle investment type selection
+        investment_type = data.get('investment_type', None)
+        use_investment_type = data.get('use_investment_type', False)
+        
+        if use_investment_type and investment_type:
+            nominal_return = get_investment_type_return(investment_type)
+            investment_info = get_investment_types().get(investment_type, {})
+        else:
+            nominal_return = parse_percentage_input(str(data.get('nominal_return', 0)))
+            investment_info = {'source': 'manual', 'name': 'Custom Return'}
         
         # Parse custom investment amount
         custom_amount_str = str(data.get('investment_amount', '100000'))
@@ -116,7 +160,10 @@ def calculate():
                 'purchasing_power_data': purchasing_power_data,
                 'assessment': assessment,
                 'investment_amount': investment_amount,
-                'investment_amount_formatted': format_currency(investment_amount)
+                'investment_amount_formatted': format_currency(investment_amount),
+                'inflation_source': inflation_source,
+                'investment_info': investment_info,
+                'country_code': country_code
             },
             'warning': warning
         })

@@ -1,23 +1,39 @@
-# 📈 Real vs. Nominal Return Calculator
+# 📈 Enhanced Real vs. Nominal Return Calculator
 
 <div align="center">
 
 ![Python](https://img.shields.io/badge/python-v3.7+-blue.svg)
 ![Flask](https://img.shields.io/badge/flask-v2.3+-green.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Status](https://img.shields.io/badge/status-active-success.svg)
+![Status](https://img.shields.io/badge/status-enhanced-success.svg)
 
-*A comprehensive Python application that calculates inflation-adjusted returns for investments*
+*A comprehensive Python application with real-time country inflation data and investment types*
 
-**Understanding the true purchasing power of your investments through the magic of mathematics!** ✨
+**Understanding the true purchasing power of your investments with real-world data!** ✨🌍💰
 
 </div>
 
 ---
 
-## 🎯 What This Calculator Does
+## 🎯 What This Enhanced Calculator Does
 
-Ever wondered if your investment returns are **actually** making you richer? This calculator reveals the truth by showing you the **real purchasing power** of your investments after accounting for inflation!
+Ever wondered if your investment returns are **actually** making you richer? This calculator reveals the truth by showing you the **real purchasing power** of your investments after accounting for inflation - now with **real-time country data** and **investment type selection**!
+
+### 🌟 NEW ENHANCED FEATURES
+
+#### 🌍 Country-wise Real-time Inflation
+- **🇮🇳 Multiple Countries**: India, USA, UK, Japan, Germany, France, Canada, Australia, China, Brazil
+- **📊 Real-time Data**: Live inflation rates (with fallback to typical rates)
+- **💱 Currency Support**: Local currency symbols and formatting
+- **🎌 Visual Flags**: Country flags for easy identification
+
+#### 💼 Investment Type Selection
+- **📈 Stocks/Equity**: High-risk, high-return investments
+- **🏦 Mutual Funds**: Equity, Hybrid, and Debt fund categories
+- **💰 Fixed Income**: FDs, PPF, NSC, Government/Corporate Bonds
+- **🏅 Tax Saving**: ELSS and other tax-advantaged investments
+- **🏠 Alternative**: Gold, Real Estate investments
+- **⚠️ Risk Assessment**: Risk levels (Very Low to High) for each type
 
 ### 📊 The Financial Concept
 
@@ -31,19 +47,21 @@ Real Return = ((1 + Nominal Return) ÷ (1 + Inflation Rate)) - 1
 ```
 
 ### 🍪 Simple Analogy
-- **Nominal Return**: "Your money grew from $100 to $108!"
-- **Inflation**: "But cookies that cost $1 now cost $1.03!"
+- **Nominal Return**: "Your money grew from ₹100 to ₹108!"
+- **Inflation**: "But cookies that cost ₹1 now cost ₹1.03!"
 - **Real Return**: "So you can actually buy 4.85% more cookies, not 8% more!"
 
 ## 🚀 Key Features
 
-### 🎮 Dual Interface Experience
+### 🎮 Enhanced Interface Experience
 - **🖥️ Command Line Interface**: Interactive text-based calculator with full features
-- **🌐 Beautiful Web Interface**: Modern, responsive design with real-time calculations
+- **🌐 Beautiful Web Interface**: Modern, responsive design with country/investment selection
 - **🚀 Quick Launcher**: Easy-to-use menu to choose your preferred interface
 
-### 💡 Smart Calculations
+### 💡 Smart Calculations with Real Data
 - **⚡ Real-time Processing**: Instant inflation-adjusted return calculations
+- **🌍 Live Country Data**: Real-time inflation rates from multiple countries
+- **💼 Investment Intelligence**: Pre-configured returns for different investment types
 - **🧮 Step-by-Step Breakdown**: See exactly how the math works
 - **🎯 Input Flexibility**: Enter percentages as "8", "8%", or "0.08"
 - **✅ Smart Validation**: Comprehensive error checking and warnings
@@ -52,27 +70,64 @@ Real Return = ((1 + Nominal Return) ÷ (1 + Inflation Rate)) - 1
 - **💰 Purchasing Power Analysis**: See long-term impact on actual buying power
 - **📈 Multiple Time Horizons**: 1, 5, 10, 20, and 30-year projections
 - **🎨 Visual Assessments**: Color-coded results (🎉 Excellent, ✅ Good, ⚠️ Careful, ❌ Poor)
-- **📚 Real-World Examples**: Pre-loaded scenarios from stocks to savings accounts
+- **🌍 Country Comparison**: Compare inflation rates across 10 countries
+- **� Investment Intelligence**: 12+ investment types with typical returns
+
+### 💼 Supported Investment Types
+
+| Category | Investment Type | Typical Return | Risk Level |
+|----------|----------------|----------------|------------|
+| **🏦 Fixed Income** | Fixed Deposits (FD) | 6.5% | Very Low |
+| | Public Provident Fund (PPF) | 7.1% | Very Low |
+| | National Savings Certificate | 6.8% | Very Low |
+| | Government Bonds | 6.0% | Very Low |
+| | Corporate Bonds | 7.5% | Low |
+| **📈 Equity** | Stocks/Equity | 12.0% | High |
+| | Equity Mutual Funds | 11.0% | High |
+| **🔄 Mutual Funds** | Hybrid Mutual Funds | 9.0% | Medium |
+| | Debt Mutual Funds | 7.0% | Low |
+| **💰 Tax Saving** | ELSS Funds | 10.5% | High |
+| **🏠 Alternative** | Real Estate | 9.0% | Medium |
+| | Gold | 8.0% | Medium |
+
+### 🌍 Supported Countries
+
+| Country | Currency | Typical Inflation |
+|---------|----------|-------------------|
+| 🇮🇳 India | ₹ | 4.5% |
+| 🇺🇸 United States | $ | 2.5% |
+| 🇬🇧 United Kingdom | £ | 2.0% |
+| 🇯🇵 Japan | ¥ | 0.5% |
+| 🇩🇪 Germany | € | 1.8% |
+| 🇫🇷 France | € | 1.9% |
+| 🇨🇦 Canada | C$ | 2.2% |
+| 🇦🇺 Australia | A$ | 2.4% |
+| 🇨🇳 China | ¥ | 2.8% |
+| 🇧🇷 Brazil | R$ | 4.0% |
 
 ### 🎓 Educational Features
 - **📖 Learning Mode**: Detailed explanations of financial concepts
 - **🔍 Formula Transparency**: See every step of the calculation
 - **💭 Contextual Tips**: Understanding what results mean for your investments
+- **🌍 Global Perspective**: Learn about inflation patterns worldwide
+- **💼 Investment Education**: Understand risk-return profiles of different investments
 
 ## 📁 Project Structure
 
 ```
 RVNC/                           📂 Main Project Directory
 ├── 🧠 calculator.py            # Core calculation functions and utilities
+├── 🌐 data_provider.py         # Country inflation & investment type data (NEW!)
 ├── 💻 cli_calculator.py        # Interactive command-line interface  
-├── 🌐 app.py                   # Flask web application server
+├── 🌐 app.py                   # Enhanced Flask web application server
 ├── 🚀 launcher.py              # Easy launcher to choose interface
 ├── 📚 examples.py              # Real-world financial scenarios
 ├── 🧪 test_calculator.py       # Comprehensive test suite
-├── 📄 requirements.txt         # Python dependencies
+├── 📄 requirements.txt         # Python dependencies (updated)
 ├── 📖 README.md               # This documentation
 └── 📁 templates/
-    └── 🎨 index.html           # Beautiful web interface template
+    ├── 🎨 index.html           # Enhanced web interface template
+    └── 📄 index_old.html       # Original template backup
 ```
 
 ### 📋 File Descriptions
@@ -80,8 +135,9 @@ RVNC/                           📂 Main Project Directory
 | File | Purpose | Features |
 |------|---------|----------|
 | `calculator.py` | Core logic | Formula implementation, validation, utilities |
+| `data_provider.py` | **NEW!** Data hub | Country inflation rates, investment types, risk levels |
 | `cli_calculator.py` | Terminal interface | Interactive prompts, detailed analysis, examples |
-| `app.py` | Web server | Flask API, JSON responses, web routing |
+| `app.py` | Enhanced web server | Country/investment APIs, enhanced routing |
 | `launcher.py` | Main menu | Choose interface, run tests, easy navigation |
 | `examples.py` | Learning tool | 8 real-world scenarios with explanations |
 | `test_calculator.py` | Quality assurance | Automated testing, validation checks |
